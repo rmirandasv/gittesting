@@ -1,7 +1,12 @@
 # image
-FROM scratch
-ADD ubuntu-focal-oci-amd64-root.tar.gz /
-RUN apt -y install python3 git
+FROM ubuntu:20.04
+SHELL ["/bin/bash", "-c"]
+RUN apt-get update
+RUN apt-get -y upgrade
+RUN apt-get -y install python3.8
+RUN apt-get -y install python3.8-venv
+RUN apt-get -y install python3-pip
+RUN apt-get -y install git
 ENV DOCKER_HOME=/home/app/webapp
 
 RUN mkdir -p $DOCKER_HOME
@@ -17,7 +22,6 @@ RUN python3 -m pip install --upgrade pip
 
 COPY . $DOCKER_HOME
 
-RUN git pull
 RUN git checkout ronald-patch1
 RUN git checkout master-fix
 RUN git checkout master
