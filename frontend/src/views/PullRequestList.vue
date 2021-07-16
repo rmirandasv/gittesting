@@ -1,0 +1,130 @@
+<template>
+	<v-sheet elevation="4">
+		<v-toolbar flat>
+			<v-btn icon @click="$router.push('/')">
+				<v-icon>mdi-arrow-left</v-icon>
+			</v-btn>
+			<v-toolbar-title>Pull Request List</v-toolbar-title>
+			<v-spacer></v-spacer>
+			<v-btn plain @click="$router.push('/newpullrequest')">New Pull Request</v-btn>
+		</v-toolbar>
+		<v-container>
+			<v-row v-if="requests.length > 0">
+				<v-col cols="12">
+					<v-card v-for="(request, index) in requests" :key="index">
+						<v-toolbar flat dense>
+							<v-toolbar-title>{{ request.title }}</v-toolbar-title>
+							<v-spacer></v-spacer>
+							<v-btn disabled class="mr-4">{{ status(request.status) }}</v-btn>
+							<v-btn outlined plain v-if="request.status === 1" @click="closePr(request.id)">Close</v-btn>
+						</v-toolbar>
+						<v-card-text>
+							<v-container>
+								<v-row>
+									<v-col cols="12">
+										<h3 class="pb-4">
+											<span class="text--disabled">{{ request.base }}</span> &lt; <span class="text--disabled">{{ request.compare }}</span>
+										</h3>
+										<h4>Las modified: {{ request.updated_at }}</h4>
+										<v-textarea :value="request.description" disabled outlined></v-textarea>
+									</v-col>
+								</v-row>
+							</v-container>
+						</v-card-text>
+					</v-card>
+				</v-col>
+			</v-row>
+			<v-row justify="center" v-else>
+				<v-col cols="auto">
+					<span class="text--disabled">No pull requests created yet.</span>
+				</v-col>
+			</v-row>
+			<v-row>
+				<v-col cols="12">
+					<v-card v-for="(request, index) in requests" :key="index">
+						<v-toolbar flat dense>
+							<v-toolbar-title>{{ request.title }}</v-toolbar-title>
+							<v-spacer></v-spacer>
+							<v-btn disabled class="mr-4">{{ status(request.status) }}</v-btn>
+							<v-btn outlined plain v-if="request.status === 1" @click="closePr(request.id)">Close</v-btn>
+						</v-toolbar>
+						<v-card-text>
+							<v-container>
+								<v-row>
+									<v-col cols="12">
+										<h3 class="pb-4">
+											<span class="text--disabled">{{ request.base }}</span> &lt; <span class="text--disabled">{{ request.compare }}</span>
+										</h3>
+										<h4>Las modified: {{ request.updated_at }}</h4>
+										<v-textarea :value="request.description" disabled outlined></v-textarea>
+									</v-col>
+								</v-row>
+							</v-container>
+						</v-card-text>
+					</v-card>
+				</v-col>
+			</v-row>
+		<v-container>
+	</v-sheet>
+</template>
+
+<script>
+import axios from 'axios'
+
+export default {
+	name: 'PullRequestList',
+
+	data() {
+		return {
+			requests: []
+		}
+	},
+
+	methods: {
+		async getPullRequests() {
+			try {
+				const response = await axios.get('/merge/')
+				if (response.status === 200) {
+					this.requests = response.data
+				}
+			} catch (err) {
+				console.log(err)
+			}
+		},
+		async closePr(id) {
+			try {
+				const response = await axios.post('/closepullrequest/' + id +'/')
+				if (response.status === 200) {
+					await this.getPullRequests()
+				}
+			} catch (err) {
+				console.log(err)
+			}
+		},
+		status(id) {
+			let label = ''
+			switch(id) {
+				case 1:
+					label = 'Open'
+					break
+				case 2:
+					label = 'Closed'
+					break
+				case 3:
+					label = 'Merged'
+					break
+				default:
+					label = 'Unkown'
+					break
+			}
+			return label
+		}
+	},
+
+	async mounted() {
+		await this.getPullRequests()
+	}
+
+}
+
+</script>
